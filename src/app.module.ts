@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
@@ -10,10 +12,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       username: 'nestuser',
       password: 'nestpassword',
       database: 'discord_db',
-      entities: [],
+      entities: [User],
       synchronize: true,
       logging: ['query', 'error'],
     }),
+    UsersModule,
   ],
   controllers: [],
   providers: [],
