@@ -3,9 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { ServerModule } from './server/server.module';
-import { Server } from 'http';
+import { Server } from './server/entities/server.entity';
 import { ChannelsModule } from './channels/channels.module';
-import { Channel } from 'diagnostics_channel';
+import { Channel } from './channels/entities/channel.entity';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
