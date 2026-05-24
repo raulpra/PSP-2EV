@@ -6,6 +6,7 @@ import { ServerModule } from './server/server.module';
 import { Server } from 'http';
 import { ChannelsModule } from './channels/channels.module';
 import { Channel } from 'diagnostics_channel';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { Channel } from 'diagnostics_channel';
     UsersModule,
     ServerModule,
     ChannelsModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
