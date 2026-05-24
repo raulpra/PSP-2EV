@@ -9,7 +9,7 @@ export class Channel {
   @Column()
   name: string;
 
-  @Column({ default: 'text' }) // Por defecto será de texto, pero podría ser 'voice'
+  @Column({ default: 'text' }) // Por defecto será de texto
   type: string;
 
   // RELACIÓN: Muchos canales pertenecen a un solo servidor

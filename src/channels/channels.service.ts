@@ -23,7 +23,7 @@ export class ChannelsService {
   }
 
   async findAll(): Promise<Channel[]> {
-    return this.channelsRepository.find({ relations: ['server'] });
+    return this.channelsRepository.find({ relations: { server: true } });
   }
 
   findOne(id: number) {

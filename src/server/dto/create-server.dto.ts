@@ -11,5 +11,5 @@ export class CreateServerDto {
 
   @IsNumber()
   @IsNotEmpty({ message: 'Se necesita el ID del creador (ownerId)' })
-  ownerId: number; 
+  ownerId: number;
 }

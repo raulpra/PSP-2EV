@@ -15,14 +15,14 @@ export class ServerService {
     const newServer = this.serverRepository.create({
       name: createServerDto.name,
       description: createServerDto.description,
-      ownerId: { id: createServerDto.ownerId },
+      owner: { id: createServerDto.ownerId },
     });
 
     return this.serverRepository.save(newServer);
   }
 
   async findAll(): Promise<Server[]> {
-    return this.serverRepository.find({ relations: ['owner'] });
+    return this.serverRepository.find({ relations: { owner: true } });
   }
 
   findOne(id: number) {
