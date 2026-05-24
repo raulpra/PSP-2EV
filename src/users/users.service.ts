@@ -36,6 +36,10 @@ export class UsersService {
   async findAll(): Promise<User[]> {
     return this.usersRepository.find();
   }
+  // Busca un usuario por su email, para el proceso de login
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({ email });
+  }
 
   findOne(id: number) {
     return `This action returns a #${id} user`;
