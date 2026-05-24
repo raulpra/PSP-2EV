@@ -4,6 +4,8 @@ import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { ServerModule } from './server/server.module';
 import { Server } from 'http';
+import { ChannelsModule } from './channels/channels.module';
+import { Channel } from 'diagnostics_channel';
 
 @Module({
   imports: [
@@ -14,12 +16,13 @@ import { Server } from 'http';
       username: 'nestuser',
       password: 'nestpassword',
       database: 'discord_db',
-      entities: [User, Server],
+      entities: [User, Server, Channel],
       synchronize: true,
       logging: ['query', 'error'],
     }),
     UsersModule,
     ServerModule,
+    ChannelsModule,
   ],
   controllers: [],
   providers: [],
