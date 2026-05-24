@@ -1,15 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Channel } from './entities/channel.entity';
 
 @Injectable()
 export class ChannelsService {
-  create(createChannelDto: CreateChannelDto) {
-    return 'This action adds a new channel';
+  constructor(
+    @InjectRepository(Channel)
+    private channelsRepository: Repository<Channel>,
+  ) {}
+
+  async create(createChannelDto: CreateChannelDto): Promise<Channel> {
+    const newChannel = this.channelsRepository.create({
+      name: createChannelDto.name,
+      type: createChannelDto.type || 'text',
+      server: { id: createChannelDto.serverId },
+    });
+
+    return this.channelsRepository.save(newChannel);
   }
 
-  findAll() {
-    return `This action returns all channels`;
+  async findAll(): Promise<Channel[]> {
+    return this.channelsRepository.find({ relations: ['server'] });
   }
 
   findOne(id: number) {
