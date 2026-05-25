@@ -4,6 +4,7 @@ import { UpdateChannelDto } from './dto/update-channel.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel } from './entities/channel.entity';
+import { Server } from 'src/server/entities/server.entity';
 
 @Injectable()
 export class ChannelsService {
@@ -23,18 +24,31 @@ export class ChannelsService {
   }
 
   async findAll(): Promise<Channel[]> {
-    return this.channelsRepository.find({ relations: { server: true } });
+    return this.channelsRepository.find({ relations: ['server'] });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} channel`;
+  async findOne(id: number): Promise<Channel | null> {
+    return this.channelsRepository.findOne({
+      where: { id },
+      relations: { server: true },
+    });
   }
 
-  update(id: number, updateChannelDto: UpdateChannelDto) {
-    return `This action updates a #${id} channel`;
+  async update(id: number, updateChannelDto: UpdateChannelDto): Promise<Channel> {
+    const channel = await this.findOne(id);
+    const { serverId, ...restoDeDatos } = updateChannelDto;
+    // Fusionamos los datos (como el nuevo nombre o tipo)
+    this.channelsRepository.merge(channel, restoDeDatos);
+
+    if (serverId) {
+      channel.server = { id: serverId } as Server; 
+    }
+
+    return this.channelsRepository.save(channel);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} channel`;
+  async remove(id: number): Promise<{ message: string }> {
+    await this.channelsRepository.delete(id);
+    return { message: `Canal con ID ${id} eliminado correctamente` };
   }
 }
