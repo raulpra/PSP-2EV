@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -33,7 +41,8 @@ export class UsersController {
 
   // Ruta para subir la foto: PATCH /users/1/avatar
   @Patch(':id/avatar')
-  @UseInterceptors(FileInterceptor('file', {
+  @UseInterceptors(
+    FileInterceptor('file', {
       // Configuramos dónde y cómo se guarda el archivo físico
       storage: diskStorage({
         destination: './uploads', // Carpeta donde irán las fotos
@@ -46,7 +55,10 @@ export class UsersController {
       }),
     }),
   )
-  uploadAvatar(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+  uploadAvatar(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     // Ahora le pasamos la ruta (file.path) a nuestro servicio para que actualice la base de datos
     return this.usersService.updateAvatar(+id, file.path);
   }
