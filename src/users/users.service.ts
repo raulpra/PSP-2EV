@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,7 +23,9 @@ export class UsersService {
       email: createUserDto.email,
     });
     if (existingUser) {
-      throw new ConflictException('Este correo electrónico ya está registrado.');
+      throw new ConflictException(
+        'Este correo electrónico ya está registrado.',
+      );
     }
 
     // Preparamos el usuario para guardarlo
@@ -45,8 +51,8 @@ export class UsersService {
     return this.usersRepository.findOneBy({ id });
   }
 
-  async update(id: number, updateUserDto: any): Promise<User | null> {
-    await this.usersRepository.update(id, updateUserDto);
+  async update(id: number, data: Partial<User>): Promise<User | null> {
+    await this.usersRepository.update(id, data);
     return this.findOne(id);
   }
 

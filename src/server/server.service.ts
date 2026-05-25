@@ -25,15 +25,27 @@ export class ServerService {
     return this.serverRepository.find({ relations: { owner: true } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} server`;
+  async findOne(id: number): Promise<Server | null> {
+    return this.serverRepository.findOne({
+      where: { id },
+      relations: { owner: true },
+    });
   }
 
-  update(id: number, updateServerDto: UpdateServerDto) {
-    return `This action updates a #${id} server`;
+  async update(id: number, data: Partial<Server> & { ownerId?: number }): Promise<Server> {
+    await this.findOne(id);
+
+    if (data.ownerId) {
+      data.owner = { id: data.ownerId } as any;
+      delete data.ownerId;
+    }
+
+    await this.serverRepository.update(id, data);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} server`;
+  async remove(id: number): Promise<{ message: string }> {
+    await this.serverRepository.delete(id);
+    return { message: `Servidor con ID ${id} eliminado correctamente` };
   }
 }
