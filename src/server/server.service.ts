@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateServerDto } from './dto/create-server.dto';
 import { UpdateServerDto } from './dto/update-server.dto';
 import { Server } from './entities/server.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class ServerService {
@@ -32,16 +33,18 @@ export class ServerService {
     });
   }
 
-  async update(id: number, data: Partial<Server> & { ownerId?: number }): Promise<Server> {
-    await this.findOne(id);
+  async update(id: number, updateServerDto: UpdateServerDto): Promise<Server> {
+    const server = await this.findOne(id);
+    // Separamos el ownerId y guardamos todo lo demás (nombre, descripción...)
+    const { ownerId, ...restoDeDatos } = updateServerDto;
 
-    if (data.ownerId) {
-      data.owner = { id: data.ownerId } as any;
-      delete data.ownerId;
+    this.serverRepository.merge(server, restoDeDatos);
+
+    if (ownerId) {
+      server.owner = { id: ownerId } as User; // Le decimos que confíe en que es un fragmento de User
     }
 
-    await this.serverRepository.update(id, data);
-    return this.findOne(id);
+    return this.serverRepository.save(server);
   }
 
   async remove(id: number): Promise<{ message: string }> {
