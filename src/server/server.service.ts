@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateServerDto } from './dto/create-server.dto';
@@ -51,8 +51,26 @@ export class ServerService {
     return this.serverRepository.save(server);
   }
 
+  async remove(id: number, userId: number): Promise<{ message: string }> {
+    // Buscamos el servidor
+    const server = await this.findOne(id);
+
+    // Comprobamos si el usuario que intenta borrar es el dueño
+    if (server.owner.id !== userId) {
+      throw new ForbiddenException(
+        'Acceso denegado: Solo el creador del servidor puede eliminarlo',
+      );
+    }
+
+    // Si llegamos aquí, es que es el dueño
+    await this.serverRepository.delete(id);
+    return { message: `Servidor con ID ${id} eliminado correctamente` };
+  }
+
+  /*
   async remove(id: number): Promise<{ message: string }> {
     await this.serverRepository.delete(id);
     return { message: `Servidor con ID ${id} eliminado correctamente` };
   }
+    */
 }
