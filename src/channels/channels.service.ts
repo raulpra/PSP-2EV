@@ -24,14 +24,18 @@ export class ChannelsService {
   }
 
   async findAll(): Promise<Channel[]> {
-    return this.channelsRepository.find({ relations: ['server'] });
+    return this.channelsRepository.find({ relations: { server: true } });
   }
 
-  async findOne(id: number): Promise<Channel | null> {
-    return this.channelsRepository.findOne({
+  async findOne(id: number): Promise<Channel> {
+    const channel = await this.channelsRepository.findOne({
       where: { id },
       relations: { server: true },
     });
+    if (!channel) {
+      throw new Error(`Canal con ID ${id} no encontrado`);
+    }
+    return channel;
   }
 
   async update(id: number, updateChannelDto: UpdateChannelDto): Promise<Channel> {
@@ -41,7 +45,7 @@ export class ChannelsService {
     this.channelsRepository.merge(channel, restoDeDatos);
 
     if (serverId) {
-      channel.server = { id: serverId } as Server; 
+      channel.server = { id: serverId } as Server;
     }
 
     return this.channelsRepository.save(channel);

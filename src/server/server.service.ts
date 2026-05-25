@@ -26,11 +26,15 @@ export class ServerService {
     return this.serverRepository.find({ relations: { owner: true } });
   }
 
-  async findOne(id: number): Promise<Server | null> {
-    return this.serverRepository.findOne({
+  async findOne(id: number): Promise<Server> {
+    const server = await this.serverRepository.findOne({
       where: { id },
       relations: { owner: true },
     });
+    if (!server) {
+      throw new Error(`Servidor con ID ${id} no encontrado`);
+    }
+    return server;
   }
 
   async update(id: number, updateServerDto: UpdateServerDto): Promise<Server> {
