@@ -1,8 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { ChannelsService } from './channels.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Request } from 'express';
+
+interface RequestWithUser extends Request {
+  user: {
+    id: number;
+  };
+}
 
 @Controller('channels')
 export class ChannelsController {
@@ -29,8 +46,10 @@ export class ChannelsController {
     return this.channelsService.update(+id, updateChannelDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.channelsService.remove(+id);
+  remove(@Param('id') id: string, @Req() req: RequestWithUser) {
+    const userId = req.user.id; // Obtenemos el ID del usuario logueado desde el token
+    return this.channelsService.remove(+id, userId);
   }
 }

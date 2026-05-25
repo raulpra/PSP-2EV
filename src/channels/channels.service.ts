@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  NotFoundException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { Repository } from 'typeorm';
@@ -51,8 +55,36 @@ export class ChannelsService {
     return this.channelsRepository.save(channel);
   }
 
-  async remove(id: number): Promise<{ message: string }> {
+  async remove(id: number, userId: number): Promise<{ message: string }> {
+    // 1. Buscamos el canal trayendo las relaciones anidadas (el servidor y su dueño)
+    const channel = await this.channelsRepository.findOne({
+      where: { id },
+      relations: {
+        server: {
+          owner: true, // Para saber quién es el dueño del servidor
+        },
+      },
+    });
+
+    if (!channel) {
+      throw new NotFoundException(`Canal con id ${id} no encontrado`);
+    }
+
+    // Comprobamos si el usuario logueado es el Owner del servidor
+    if (channel.server.owner.id !== userId) {
+      throw new ForbiddenException(
+        'Acceso denegado: Solo el Owner del servidor puede eliminar canales',
+      );
+    }
+
+    // Si es el dueño, borramos el canal
     await this.channelsRepository.delete(id);
     return { message: `Canal con ID ${id} eliminado correctamente` };
   }
+
+  /*async remove(id: number): Promise<{ message: string }> {
+    await this.channelsRepository.delete(id);
+    return { message: `Canal con ID ${id} eliminado correctamente` };
+  }
+    */
 }

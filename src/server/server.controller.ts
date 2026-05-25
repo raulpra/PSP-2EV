@@ -6,10 +6,20 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ServerService } from './server.service';
 import { CreateServerDto } from './dto/create-server.dto';
 import { UpdateServerDto } from './dto/update-server.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Request } from 'express';
+
+interface RequestWithUser extends Request {
+  user: {
+    id: number;
+  };
+}
 
 @Controller('server')
 export class ServerController {
@@ -35,8 +45,10 @@ export class ServerController {
     return this.serverService.update(+id, updateServerDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.serverService.remove(+id);
+  remove(@Param('id') id: string, @Req() req: RequestWithUser) {
+    const userId = req.user.id;
+    return this.serverService.remove(+id, userId);
   }
 }
