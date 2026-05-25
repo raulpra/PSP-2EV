@@ -29,7 +29,7 @@ export class UsersService {
       password: createUserDto.password, // Se guarda tal cual viene del DTO
     });
 
-    // 3. Lo guardamos definitivamente en PostgreSQL
+    // Lo guardamos definitivamente en PostgreSQL
     return this.usersRepository.save(newUser);
   }
 
@@ -49,5 +49,14 @@ export class UsersService {
   }
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async updateAvatar(id: number, avatarPath: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+    user.avatar = avatarPath; // Le asignamos la ruta de la imagen
+    return this.usersRepository.save(user);
   }
 }
