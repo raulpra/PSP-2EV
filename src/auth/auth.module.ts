@@ -8,8 +8,8 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [UsersModule, JwtModule.register({
-    secret: jwtConstants.secret,
-    signOptions: { expiresIn: '2h' }, // El token expirará en 2 horas
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: '2h' }, // El token expirará en 2 horas
     }),
   ],
   providers: [AuthService, JwtStrategy],

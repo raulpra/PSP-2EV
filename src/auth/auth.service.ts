@@ -13,7 +13,9 @@ export class AuthService {
     const user = await this.usersService.findByEmail(email);
     // Comprobamos si el usuario existe y si la contraseña coincide
     if (!user || user.password !== pass) {
-      throw new UnauthorizedException('El email o la contraseña son incorrectos');
+      throw new UnauthorizedException(
+        'El email o la contraseña son incorrectos',
+      );
     }
 
     const payload = { email: user.email, sub: user.id };
