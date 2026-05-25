@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   NotFoundException,
+  InternalServerErrorException,
   Injectable,
 } from '@nestjs/common';
 import { CreateChannelDto } from './dto/create-channel.dto';
@@ -23,8 +24,13 @@ export class ChannelsService {
       type: createChannelDto.type || 'text',
       server: { id: createChannelDto.serverId },
     });
-
-    return this.channelsRepository.save(newChannel);
+    try {
+      return await this.channelsRepository.save(newChannel);
+    } catch {
+      throw new InternalServerErrorException(
+        'Error al crear el canal, inténtalo de nuevo.',
+      );
+    }
   }
 
   async findAll(): Promise<Channel[]> {
@@ -37,7 +43,7 @@ export class ChannelsService {
       relations: { server: true },
     });
     if (!channel) {
-      throw new Error(`Canal con ID ${id} no encontrado`);
+      throw new NotFoundException(`Canal con ID ${id} no encontrado`);
     }
     return channel;
   }

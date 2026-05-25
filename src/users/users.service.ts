@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -18,16 +19,6 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    // Comprobamos si ya existe con ese email
-    const existingUser = await this.usersRepository.findOneBy({
-      email: createUserDto.email,
-    });
-    if (existingUser) {
-      throw new ConflictException(
-        'Este correo electrónico ya está registrado.',
-      );
-    }
-
     // Preparamos el usuario para guardarlo
     const newUser = this.usersRepository.create({
       username: createUserDto.username,
@@ -35,8 +26,20 @@ export class UsersService {
       password: createUserDto.password, // Se guarda tal cual viene del DTO
     });
 
-    // Lo guardamos definitivamente en PostgreSQL
-    return this.usersRepository.save(newUser);
+    try {
+      // Intentamos guardarlo en la base de datos
+      return await this.usersRepository.save(newUser);
+    } catch (error) {
+      // Si el error es por violación de la restricción UNIQUE (email o username repetido)
+      if (error.code === '23505') {
+        throw new ConflictException(
+          'Este correo electrónico o nombre de usuario ya está registrado.',
+        );
+      }
+      throw new InternalServerErrorException(
+        'Error al crear el usuario. Por favor, inténtalo de nuevo.',
+      );
+    }
   }
 
   async findAll(): Promise<User[]> {

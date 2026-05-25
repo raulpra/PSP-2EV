@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  InternalServerErrorException,
+  Injectable,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateServerDto } from './dto/create-server.dto';
@@ -18,8 +22,13 @@ export class ServerService {
       description: createServerDto.description,
       owner: { id: createServerDto.ownerId },
     });
-
-    return this.serverRepository.save(newServer);
+    try {
+      return await this.serverRepository.save(newServer);
+    } catch {
+      throw new InternalServerErrorException(
+        'Error al crear el servidor, inténtalo de nuevo.',
+      );
+    }
   }
 
   async findAll(): Promise<Server[]> {
@@ -32,7 +41,9 @@ export class ServerService {
       relations: { owner: true },
     });
     if (!server) {
-      throw new Error(`Servidor con ID ${id} no encontrado`);
+      throw new InternalServerErrorException(
+        `Servidor con ID ${id} no encontrado`,
+      );
     }
     return server;
   }
