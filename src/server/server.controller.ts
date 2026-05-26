@@ -17,7 +17,8 @@ import { Request } from 'express';
 
 interface RequestWithUser extends Request {
   user: {
-    id: number;
+    userId: number;
+    email: string;
   };
 }
 
@@ -25,8 +26,10 @@ interface RequestWithUser extends Request {
 export class ServerController {
   constructor(private readonly serverService: ServerService) {}
 
+  @UseGuards(JwtAuthGuard) // Solo usuarios autenticados pueden crear servidores, el dueño es quien lo crea, así que necesitamos su ID 
   @Post()
-  create(@Body() createServerDto: CreateServerDto) {
+  create(@Body() createServerDto: CreateServerDto, @Req() req: RequestWithUser) {
+    createServerDto.ownerId = req.user.userId; // Asignamos el ID del usuario logueado como ownerId
     return this.serverService.create(createServerDto);
   }
 
@@ -40,6 +43,7 @@ export class ServerController {
     return this.serverService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateServerDto: UpdateServerDto) {
     return this.serverService.update(+id, updateServerDto);
@@ -48,7 +52,7 @@ export class ServerController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req: RequestWithUser) {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     return this.serverService.remove(+id, userId);
   }
 }
