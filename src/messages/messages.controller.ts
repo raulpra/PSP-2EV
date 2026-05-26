@@ -17,7 +17,8 @@ import { Request } from 'express';
 
 interface RequestWithUser extends Request {
   user: {
-    id: number;
+    userId: number;
+    email: string;
   };
 }
 
@@ -28,8 +29,8 @@ export class MessagesController {
 
   @Post()
   create(@Body() createMessageDto: CreateMessageDto, @Req() req: RequestWithUser ) {
-    // Aquí ya tenemos acceso a req.user.id, que es el ID del usuario autenticado
-    return this.messagesService.create(createMessageDto, req.user.id);
+    // Aquí ya tenemos acceso a req.user.userId, que es el ID del usuario autenticado
+    return this.messagesService.create(createMessageDto, req.user.userId);
   }
 
   //GET /messages/channel/1 -> Trae todos los mensajes del canal con ID 1

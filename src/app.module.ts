@@ -7,6 +7,7 @@ import { Server } from './server/entities/server.entity';
 import { ChannelsModule } from './channels/channels.module';
 import { Channel } from './channels/entities/channel.entity';
 import { AuthModule } from './auth/auth.module';
+import { Message } from './messages/entities/message.entity';
 import { MessagesModule } from './messages/messages.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -26,7 +27,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [User, Server, Channel],
+        entities: [User, Server, Channel, Message],
         synchronize: true,
         logging: ['query', 'error'],
       }),
