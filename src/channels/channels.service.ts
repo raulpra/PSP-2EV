@@ -62,7 +62,7 @@ export class ChannelsService {
   }
 
   async remove(id: number, userId: number): Promise<{ message: string }> {
-    // 1. Buscamos el canal trayendo las relaciones anidadas (el servidor y su dueño)
+    //  Buscamos el canal trayendo las relaciones anidadas (el servidor y su dueño)
     const channel = await this.channelsRepository.findOne({
       where: { id },
       relations: {
