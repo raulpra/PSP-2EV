@@ -1,9 +1,11 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:15
-    container_name: discord_clone_db
+  # Base de datos PostgreSQL 
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: discord_postgres
+    restart: always
     environment:
       POSTGRES_USER: nestuser
       POSTGRES_PASSWORD: nestpassword
@@ -12,6 +14,33 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - discord_network
+
+  # Backend de NestJS
+  nestjs-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: discord_api
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres-db
+      DB_PORT: 5432
+      DB_USERNAME: nestuser
+      DB_PASSWORD: nestpassword
+      DB_NAME: discord_db
+      JWT_SECRET: mi-palabra-secreta-super-protegida
+    depends_on:
+      - postgres-db
+    networks:
+      - discord_network
 
 volumes:
   postgres_data:
+
+networks:
+  discord_network:
+    driver: bridge

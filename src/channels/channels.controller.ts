@@ -17,7 +17,8 @@ import { Request } from 'express';
 
 interface RequestWithUser extends Request {
   user: {
-    id: number;
+    userId: number;
+    email: string;
   };
 }
 
@@ -49,7 +50,7 @@ export class ChannelsController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req: RequestWithUser) {
-    const userId = req.user.id; // Obtenemos el ID del usuario logueado desde el token
+    const userId = req.user.userId; // Obtenemos el ID del usuario logueado desde el token
     return this.channelsService.remove(+id, userId);
   }
 }
