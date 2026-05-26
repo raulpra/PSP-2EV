@@ -5,6 +5,7 @@ import { Message } from './entities/message.entity';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import * as crypto from 'crypto'; // Librería nativa de Node.js para seguridad
+import { ChatGateway } from './chat.gateway';
 
 @Injectable()
 export class MessagesService {
@@ -15,6 +16,7 @@ export class MessagesService {
   constructor(
     @InjectRepository(Message)
     private readonly messagesRepository: Repository<Message>,
+    private readonly chatGateway: ChatGateway,
   ) {}
 
   // Función para cifrar
@@ -37,6 +39,31 @@ export class MessagesService {
     return decrypted;
   }
 
+  // Método para crear mensajes que también emite el mensaje en vivo a través del Gateway
+  async create(createMessageDto: CreateMessageDto, userId: number): Promise<Message> {
+    const newMessage = this.messagesRepository.create({
+      // Ciframos el contenido antes de guardarlo
+      content: this.encrypt(createMessageDto.content),
+      channel: { id: createMessageDto.channelId },
+      sender: { id: userId },
+    });
+
+    // Guardamos el mensaje cifrado en la base de datos
+    const savedMessage = await this.messagesRepository.save(newMessage);
+
+    // Copiamos todos los datos del mensaje guardado pero reemplazamos el content por el texto sin cifrar para enviarlo a los clientes conectados
+    const mensajeVisible = {
+      ...savedMessage,
+      content: createMessageDto.content, // Enviamos el contenido sin cifrar a los clientes conectados
+    };
+    // Usamos el Gateway para empujar el mensaje en tiempo real a los clientes conectados
+    this.chatGateway.enviarMensajeEnVivo(mensajeVisible);
+
+    // Devolvemos el mensaje para que la petición HTTP normal también termine con éxito
+    return mensajeVisible;
+  }
+
+  /*Método para crear mensajes sin WebSocket.
   async create(createMessageDto: CreateMessageDto, userId: number): Promise<Message> {
     const newMessage = this.messagesRepository.create({
       // Ciframos el contenido antes de guardarlo
@@ -47,7 +74,7 @@ export class MessagesService {
 
     return this.messagesRepository.save(newMessage);
   }
-
+  */
   // Obtener los mensajes de un canal y descifrarlos
   async findByChannel(channelId: number): Promise<any[]> {
     const messages = await this.messagesRepository.find({
@@ -61,11 +88,9 @@ export class MessagesService {
       id: msg.id,
       content: this.decrypt(msg.content), // Lo desciframos para que el cliente lo lea bien
       createdAt: msg.createdAt,
-      sender: msg.sender.username, // Solo enviamos el nombre, no la contraseña ni el email
+      sender: msg.sender.username, // Solo enviamos el nombre
     }));
   }
-
-  // --- Métodos CRUD Básicos ---
 
   async findOne(id: number): Promise<Message> {
     const message = await this.messagesRepository.findOne({
@@ -79,7 +104,6 @@ export class MessagesService {
     return message;
   }
 
-  // IMPORTANTE: Asegúrate de tener importado UpdateMessageDto arriba del todo
   async update(id: number, updateMessageDto: UpdateMessageDto): Promise<Message> {
     const message = await this.findOne(id);
     // Si en la actualización envían texto nuevo, lo ciframos antes de guardarlo

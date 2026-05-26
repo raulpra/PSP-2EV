@@ -42,6 +42,7 @@ export class ChannelsController {
     return this.channelsService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateChannelDto: UpdateChannelDto) {
     return this.channelsService.update(+id, updateChannelDto);
