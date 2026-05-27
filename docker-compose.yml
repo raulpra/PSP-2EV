@@ -7,9 +7,9 @@ services:
     container_name: discord_postgres
     restart: always
     environment:
-      POSTGRES_USER: nestuser
-      POSTGRES_PASSWORD: nestpassword
-      POSTGRES_DB: discord_db
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
@@ -26,13 +26,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    environment:
-      DB_HOST: postgres-db
-      DB_PORT: 5432
-      DB_USERNAME: nestuser
-      DB_PASSWORD: nestpassword
-      DB_NAME: discord_db
-      JWT_SECRET: mi-palabra-secreta-super-protegida
+    env_file:
+      - .env
     depends_on:
       - postgres-db
     networks:
