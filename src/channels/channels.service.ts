@@ -61,6 +61,12 @@ export class ChannelsService {
     return this.channelsRepository.save(channel);
   }
 
+  async remove(id: number): Promise<{ message: string }> {
+    await this.channelsRepository.delete(id);
+    return { message: `Canal con ID ${id} eliminado correctamente` };
+  }
+
+  /* Método sin usar el ServerRolesGuard, solo comprobando aquí si el usuario es el Owner del servidor antes de eliminar el canal.
   async remove(id: number, userId: number): Promise<{ message: string }> {
     //  Buscamos el canal trayendo las relaciones anidadas (el servidor y su dueño)
     const channel = await this.channelsRepository.findOne({
@@ -87,10 +93,5 @@ export class ChannelsService {
     await this.channelsRepository.delete(id);
     return { message: `Canal con ID ${id} eliminado correctamente` };
   }
-
-  /*async remove(id: number): Promise<{ message: string }> {
-    await this.channelsRepository.delete(id);
-    return { message: `Canal con ID ${id} eliminado correctamente` };
-  }
-    */
+*/
 }
