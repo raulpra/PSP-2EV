@@ -14,6 +14,8 @@ import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request } from 'express';
+import { ServerRolesGuard } from 'src/auth/server-roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 interface RequestWithUser extends Request {
   user: {
@@ -48,10 +50,10 @@ export class ChannelsController {
     return this.channelsService.update(+id, updateChannelDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ServerRolesGuard)
+  @Roles('owner') // Solo el owner del servidor puede eliminar canales
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() req: RequestWithUser) {
-    const userId = req.user.userId; // Obtenemos el ID del usuario logueado desde el token
-    return this.channelsService.remove(+id, userId);
+  remove(@Param('id') id: string) {
+    return this.channelsService.remove(+id);
   }
 }
